@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
+import * as path from 'path';
 
 export function activate(context: vscode.ExtensionContext) {
     // コマンド登録
@@ -11,7 +12,7 @@ export function activate(context: vscode.ExtensionContext) {
             const searchRegex = new RegExp(pattern, 'i');
             let files = await vscode.workspace.findFiles('**/*', null);
             // 正規表現でフィルタ
-            files = files.filter(file => searchRegex.test(file.path));
+            files = files.filter(file => searchRegex.test(path.basename(file.path)));
             if (files.length > 0) {
                 // ファイルパス一覧を文字列に変換
                 let content = "Find Results(Alt + Click To Jump)" + "\n";

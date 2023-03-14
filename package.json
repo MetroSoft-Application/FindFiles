@@ -3,6 +3,11 @@
   "displayName": "FindFiles",
   "description": "",
   "version": "0.0.1",
+  "publisher": "MetroSoft",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alexisonwire/FindFiles"
+  },
   "engines": {
     "vscode": "^1.74.0"
   },
@@ -10,7 +15,7 @@
     "Other"
   ],
   "activationEvents": [
-    "*"
+   "onCommand:FindFiles"
   ],
   "main": "./src/extension.js",
   "contributes": {

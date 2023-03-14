@@ -15,7 +15,8 @@
             ],
             // "preLaunchTask": "npm",
             "request": "launch",
-            "type": "extensionHost"
+            "type": "extensionHost",
+            "sourceMaps": true
         }
     ]
 }

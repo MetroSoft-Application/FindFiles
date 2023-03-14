@@ -39,6 +39,7 @@ exports.__esModule = true;
 exports.deactivate = exports.activate = void 0;
 var vscode = require("vscode");
 var fs = require("fs");
+var path = require("path");
 function activate(context) {
     var _this = this;
     // コマンド登録
@@ -55,7 +56,7 @@ function activate(context) {
                 case 2:
                     files = _a.sent();
                     // 正規表現でフィルタ
-                    files = files.filter(function (file) { return searchRegex_1.test(file.path); });
+                    files = files.filter(function (file) { return searchRegex_1.test(path.basename(file.path)); });
                     if (!(files.length > 0)) return [3 /*break*/, 5];
                     content = "Find Results(Alt + Click To Jump)" + "\n";
                     content += files.map(function (file) { return file.fsPath; }).join('\n');
@@ -88,11 +89,6 @@ var FileLinkProvider = /** @class */ (function () {
     FileLinkProvider.prototype.provideDocumentLinks = function (document) {
         // ドキュメント内の全ての行に対して、ファイルパスからURIオブジェクトと範囲オブジェクトを作成し、
         // ドキュメントリンクオブジェクトに変換
-        // return document.getText().split('\n').map((line, index) => {
-        //   let uri = vscode.Uri.file(line);
-        //   let range = new vscode.Range(new vscode.Position(index, 0), new vscode.Position(index, line.length));
-        //   return new vscode.DocumentLink(range, uri);
-        // });
         var index = 0;
         var links = [];
         document.getText().split('\n').forEach(function (line) {
@@ -108,3 +104,4 @@ var FileLinkProvider = /** @class */ (function () {
     };
     return FileLinkProvider;
 }());
+//# sourceMappingURL=extension.js.map
