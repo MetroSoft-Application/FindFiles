@@ -2,7 +2,7 @@
   "name": "findfiles",
   "displayName": "FindFiles",
   "description": "",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "publisher": "MetroSoft",
   "repository": {
     "type": "git",
@@ -15,7 +15,7 @@
     "Other"
   ],
   "activationEvents": [
-   "onCommand:FindFiles"
+    "onCommand:FindFiles"
   ],
   "main": "./src/extension.js",
   "contributes": {
