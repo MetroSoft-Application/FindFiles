@@ -10,12 +10,12 @@ export function activate(context: vscode.ExtensionContext) {
         if (pattern) {
             // 大文字小文字を区別せずに検索する正規表現パターン
             const searchRegex = new RegExp(pattern, 'i');
-            let files = await vscode.workspace.findFiles('**/*', null);
+            let files = (await vscode.workspace.findFiles('**/*', null)).sort();
             // 正規表現でフィルタ
             files = files.filter(file => searchRegex.test(path.basename(file.path)));
             if (files.length > 0) {
                 // ファイルパス一覧を文字列に変換
-                let content = "Find Results(Alt + Click To Jump)" + "\n";
+                let content = "Find Results(Alt + Click To Jump) pattern = " + pattern + "\n";
                 content += files.map(file => file.fsPath).join('\n');
                 // 新たなテキストエディターを開く
                 let document = await vscode.workspace.openTextDocument({ content });
