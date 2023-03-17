@@ -6,7 +6,7 @@
   "publisher": "MetroSoft",
   "repository": {
     "type": "git",
-    "url": "https://github.com/alexisonwire/FindFiles"
+    "url": "https://github.com/MetroSoft-Application/FindFiles"
   },
   "engines": {
     "vscode": "^1.74.0"
