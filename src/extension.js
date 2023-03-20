@@ -50,31 +50,30 @@ function activate(context) {
                 case 0: return [4 /*yield*/, vscode.window.showInputBox({ prompt: 'Enter a file pattern' })];
                 case 1:
                     pattern = _a.sent();
-                    if (!pattern) return [3 /*break*/, 7];
+                    if (!pattern) return [3 /*break*/, 6];
                     searchRegex_1 = new RegExp(pattern, 'i');
                     return [4 /*yield*/, vscode.workspace.findFiles('**/*', null)];
-                case 2: return [4 /*yield*/, (_a.sent()).sort()];
-                case 3:
-                    files = _a.sent();
+                case 2:
+                    files = (_a.sent()).sort();
                     // 正規表現でフィルタ
                     files = files.filter(function (file) { return searchRegex_1.test(path.basename(file.path)); });
-                    if (!(files.length > 0)) return [3 /*break*/, 6];
-                    content = "Find Results(Alt + Click To Jump) pattern = " + pattern + "\n";
+                    if (!(files.length > 0)) return [3 /*break*/, 5];
+                    content = "Find Results(Ctrl or Alt + Click To Jump) pattern = " + pattern + "\n";
                     content += files.map(function (file) { return file.fsPath; }).join('\n');
                     return [4 /*yield*/, vscode.workspace.openTextDocument({ content: content })];
-                case 4:
+                case 3:
                     document_1 = _a.sent();
                     return [4 /*yield*/, vscode.window.showTextDocument(document_1)];
-                case 5:
+                case 4:
                     _a.sent();
                     // ドキュメントリンクプロバイダーを登録
                     context.subscriptions.push(vscode.languages.registerDocumentLinkProvider(document_1.uri, new FileLinkProvider()));
-                    return [3 /*break*/, 7];
-                case 6:
+                    return [3 /*break*/, 6];
+                case 5:
                     // 一致するファイルがない場合はメッセージを表示
                     vscode.window.showInformationMessage('No matching files found.');
-                    _a.label = 7;
-                case 7: return [2 /*return*/];
+                    _a.label = 6;
+                case 6: return [2 /*return*/];
             }
         });
     }); });

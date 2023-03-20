@@ -15,7 +15,7 @@ export function activate(context: vscode.ExtensionContext) {
             files = files.filter(file => searchRegex.test(path.basename(file.path)));
             if (files.length > 0) {
                 // ファイルパス一覧を文字列に変換
-                let content = "Find Results(Alt + Click To Jump) pattern = " + pattern + "\n";
+                let content = "Find Results(Ctrl or Alt + Click To Jump) pattern = " + pattern + "\n";
                 content += files.map(file => file.fsPath).join('\n');
                 // 新たなテキストエディターを開く
                 let document = await vscode.workspace.openTextDocument({ content });
