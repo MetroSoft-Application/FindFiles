@@ -3,7 +3,7 @@
   "displayName": "FindFiles",
   "description": "Find files and create document links.",
   "version": "1.0.0",
-  "publisher": "MetroSoft",
+  "publisher": "MetroSoft-Application",
   "repository": {
     "type": "git",
     "url": "https://github.com/MetroSoft-Application/FindFiles"
