@@ -36,52 +36,104 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.deactivate = exports.activate = void 0;
+exports.activate = void 0;
 var vscode = require("vscode");
 var fs = require("fs");
 var path = require("path");
 function activate(context) {
-    var _this = this;
-    // コマンド登録
-    var command = vscode.commands.registerCommand('FindFiles', function () { return __awaiter(_this, void 0, void 0, function () {
-        var pattern, searchRegex_1, files, content, document_1;
+    var disposable = vscode.commands.registerCommand('FindFiles', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var panel, htmlPath, htmlContent;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        panel = vscode.window.createWebviewPanel('form', 'FindFiles', vscode.ViewColumn.One, {
+                            enableScripts: true,
+                            retainContextWhenHidden: true
+                        });
+                        htmlPath = vscode.Uri.file(path.join(context.extensionPath, 'resources', 'index.html'));
+                        return [4 /*yield*/, vscode.workspace.fs.readFile(htmlPath)];
+                    case 1:
+                        htmlContent = _a.sent();
+                        panel.webview.html = htmlContent.toString();
+                        panel.webview.onDidReceiveMessage(function (message) { return __awaiter(_this, void 0, void 0, function () {
+                            var _a;
+                            return __generator(this, function (_b) {
+                                switch (_b.label) {
+                                    case 0:
+                                        _a = message.command;
+                                        switch (_a) {
+                                            case 'submit': return [3 /*break*/, 1];
+                                        }
+                                        return [3 /*break*/, 3];
+                                    case 1:
+                                        if (!message.text) {
+                                            return [2 /*return*/];
+                                        }
+                                        return [4 /*yield*/, findFiles(context, message.text)];
+                                    case 2:
+                                        _b.sent();
+                                        return [2 /*return*/];
+                                    case 3: return [2 /*return*/];
+                                }
+                            });
+                        }); }, undefined, context.subscriptions);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    });
+    context.subscriptions.push(disposable);
+}
+exports.activate = activate;
+function findFiles(context, input) {
+    return __awaiter(this, void 0, void 0, function () {
+        var pattern, regexPattern, patternRegex_1, files, exclude, excludeRegexPattern, excludeRegex_1, content, document_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, vscode.window.showInputBox({ prompt: 'Enter a file pattern' })];
-                case 1:
-                    pattern = _a.sent();
-                    if (!pattern) return [3 /*break*/, 6];
-                    searchRegex_1 = new RegExp(pattern, 'i');
+                case 0:
+                    pattern = input === null || input === void 0 ? void 0 : input.split(",")[0];
+                    if (!pattern) return [3 /*break*/, 5];
+                    regexPattern = convertWildcardToRegex(pattern);
+                    patternRegex_1 = new RegExp("^".concat(regexPattern, "$"), 'i');
                     return [4 /*yield*/, vscode.workspace.findFiles('**/*', null)];
-                case 2:
+                case 1:
                     files = (_a.sent()).sort();
-                    // 正規表現でフィルタ
-                    files = files.filter(function (file) { return searchRegex_1.test(path.basename(file.path)); });
-                    if (!(files.length > 0)) return [3 /*break*/, 5];
+                    files = files.filter(function (file) { return patternRegex_1.test(path.basename(file.path)); });
+                    exclude = input === null || input === void 0 ? void 0 : input.split(",")[1];
+                    if (exclude) {
+                        excludeRegexPattern = convertWildcardToRegex(exclude);
+                        excludeRegex_1 = new RegExp("^".concat(excludeRegexPattern, "$"), 'i');
+                        files = files.filter(function (file) { return !excludeRegex_1.test(path.basename(file.path)); });
+                    }
+                    if (!(files.length > 0)) return [3 /*break*/, 4];
                     content = "Find Results(Ctrl or Alt + Click To Jump) pattern = " + pattern + "\n";
                     content += files.map(function (file) { return file.fsPath; }).join('\n');
                     return [4 /*yield*/, vscode.workspace.openTextDocument({ content: content })];
-                case 3:
+                case 2:
                     document_1 = _a.sent();
                     return [4 /*yield*/, vscode.window.showTextDocument(document_1)];
-                case 4:
+                case 3:
                     _a.sent();
                     // ドキュメントリンクプロバイダーを登録
                     context.subscriptions.push(vscode.languages.registerDocumentLinkProvider(document_1.uri, new FileLinkProvider()));
-                    return [3 /*break*/, 6];
-                case 5:
+                    return [3 /*break*/, 5];
+                case 4:
                     // 一致するファイルがない場合はメッセージを表示
                     vscode.window.showInformationMessage('No matching files found.');
-                    _a.label = 6;
-                case 6: return [2 /*return*/];
+                    _a.label = 5;
+                case 5: return [2 /*return*/];
             }
         });
-    }); });
-    context.subscriptions.push(command);
+    });
 }
-exports.activate = activate;
-function deactivate() { }
-exports.deactivate = deactivate;
+function convertWildcardToRegex(wildcard) {
+    return wildcard
+        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // 特殊文字をエスケープ
+        .replace(/\\\*/g, '.*') // ワイルドカードを正規表現パターンに変換
+        .replace(/^\\\*|\\\*$/g, ''); // 先頭と末尾のワイルドカードを削除
+}
 // ドキュメントリンクプロバイダー
 var FileLinkProvider = /** @class */ (function () {
     function FileLinkProvider() {
@@ -104,4 +156,7 @@ var FileLinkProvider = /** @class */ (function () {
     };
     return FileLinkProvider;
 }());
+exports.activate = activate;
+function deactivate() { }
+exports.deactivate = deactivate;
 //# sourceMappingURL=extension.js.map

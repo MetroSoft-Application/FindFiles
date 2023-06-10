@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Form</title>
+        <style>
+            form {
+                display: flex;
+                flex-direction: column;
+            }
+
+            form label,
+            form input {
+                width: 250px;
+                margin-top: 4px;
+                margin-bottom: 2px;
+            }
+
+            form label {
+                display: flex;
+                align-items: center;
+            }
+
+            form label span {
+                margin-right: 1px;
+                min-width: 60px;
+            }
+
+            .button-container {
+                display: flex;
+                justify-content: flex-start;
+            }
+
+            button {
+                margin-top: 5px;
+                padding: 5px 12px;
+                background-color: #2276B8;
+                color: #ffffff;
+                border: none;
+            }
+        </style>
+    </head>
+
+    <body>
+        <form>
+            <label for="Pattern">
+                <span>Pattern</span>
+                <input type="text" id="Pattern" placeholder="*.ts, file*, *file*" name="Pattern">
+            </label>
+            <label for="Exclude">
+                <span>Exclude</span>
+                <input type="text" id="Exclude" placeholder="*.ts, file*, *file*" name="Exclude">
+            </label>
+            <div class="button-container">
+                <button type="button" id="button">Exec</button>
+            </div>
+        </form>
+        <script>
+            const vscode = acquireVsCodeApi();
+            const button = document.getElementById('button');
+            button.addEventListener('click', () =>
+            {
+                let data = [document.getElementById('Pattern').value,
+                document.getElementById('Exclude').value
+                ];
+                vscode.postMessage({
+                    command: 'submit',
+                    text: data.join(",")
+                });
+            });
+        </script>
+    </body>
+
+</html>

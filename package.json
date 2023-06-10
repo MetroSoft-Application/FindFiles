@@ -2,7 +2,7 @@
   "name": "findfiles",
   "displayName": "FindFiles",
   "description": "Find files and create document links.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "MetroSoft-Application",
   "repository": {
     "type": "git",
@@ -19,7 +19,7 @@
   ],
   "main": "./src/extension.js",
   "contributes": {
-        "commands": [
+    "commands": [
       {
         "command": "FindFiles",
         "title": "FindFiles"
