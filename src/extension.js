@@ -89,41 +89,70 @@ function activate(context) {
 exports.activate = activate;
 function findFiles(context, input) {
     return __awaiter(this, void 0, void 0, function () {
-        var pattern, regexPattern, patternRegex_1, files, exclude, excludeRegexPattern, excludeRegex_1, content, document_1;
+        var pattern;
+        var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     pattern = input === null || input === void 0 ? void 0 : input.split(",")[0];
-                    if (!pattern) return [3 /*break*/, 5];
-                    regexPattern = convertWildcardToRegex(pattern);
-                    patternRegex_1 = new RegExp("^".concat(regexPattern, "$"), 'i');
-                    return [4 /*yield*/, vscode.workspace.findFiles('**/*', null)];
+                    return [4 /*yield*/, vscode.window.withProgress({
+                            location: vscode.ProgressLocation.Notification,
+                            title: "Searching files...",
+                            cancellable: false
+                        }, function (progress) { return __awaiter(_this, void 0, void 0, function () {
+                            var regexPattern, patternRegex_1, files, isInclude, exclude, excludeRegexPattern, excludeRegex_1, content, document_1;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0:
+                                        if (!pattern) return [3 /*break*/, 5];
+                                        regexPattern = convertWildcardToRegex(pattern);
+                                        patternRegex_1 = new RegExp("^".concat(regexPattern, "$"), 'i');
+                                        return [4 /*yield*/, vscode.workspace.findFiles('**/*', null)];
+                                    case 1:
+                                        files = (_a.sent()).sort();
+                                        isInclude = input && input.split(",")[1] === "true";
+                                        if (isInclude) {
+                                            // files = files.filter(file => patternRegex.test(path.dirname(file.path) || path.basename(file.path)));
+                                            files = files.filter(function (file) { return patternRegex_1.test(file.path); });
+                                        }
+                                        else {
+                                            files = files.filter(function (file) { return patternRegex_1.test(path.basename(file.path)); });
+                                        }
+                                        exclude = input === null || input === void 0 ? void 0 : input.split(",")[2];
+                                        if (exclude) {
+                                            excludeRegexPattern = convertWildcardToRegex(exclude);
+                                            excludeRegex_1 = new RegExp("^".concat(excludeRegexPattern, "$"), 'i');
+                                            if (isInclude) {
+                                                // files = files.filter(file => !excludeRegex.test(file.path || path.basename(file.path)));
+                                                files = files.filter(function (file) { return !excludeRegex_1.test(file.path); });
+                                            }
+                                            else {
+                                                files = files.filter(function (file) { return !excludeRegex_1.test(path.basename(file.path)); });
+                                            }
+                                        }
+                                        if (!(files.length > 0)) return [3 /*break*/, 4];
+                                        content = "Find Results(Ctrl or Alt + Click To Jump) Pattern = ".concat(pattern, ", IncludeFolder = ").concat(isInclude, ", Exclude = ").concat(exclude !== "" ? exclude : "None", " \n");
+                                        content += files.map(function (file) { return file.fsPath; }).join('\n');
+                                        return [4 /*yield*/, vscode.workspace.openTextDocument({ content: content })];
+                                    case 2:
+                                        document_1 = _a.sent();
+                                        return [4 /*yield*/, vscode.window.showTextDocument(document_1)];
+                                    case 3:
+                                        _a.sent();
+                                        // ドキュメントリンクプロバイダーを登録
+                                        context.subscriptions.push(vscode.languages.registerDocumentLinkProvider(document_1.uri, new FileLinkProvider()));
+                                        return [3 /*break*/, 5];
+                                    case 4:
+                                        // 一致するファイルがない場合はメッセージを表示
+                                        vscode.window.showInformationMessage('No matching files found.');
+                                        _a.label = 5;
+                                    case 5: return [2 /*return*/];
+                                }
+                            });
+                        }); })];
                 case 1:
-                    files = (_a.sent()).sort();
-                    files = files.filter(function (file) { return patternRegex_1.test(path.basename(file.path)); });
-                    exclude = input === null || input === void 0 ? void 0 : input.split(",")[1];
-                    if (exclude) {
-                        excludeRegexPattern = convertWildcardToRegex(exclude);
-                        excludeRegex_1 = new RegExp("^".concat(excludeRegexPattern, "$"), 'i');
-                        files = files.filter(function (file) { return !excludeRegex_1.test(path.basename(file.path)); });
-                    }
-                    if (!(files.length > 0)) return [3 /*break*/, 4];
-                    content = "Find Results(Ctrl or Alt + Click To Jump) pattern = " + pattern + "\n";
-                    content += files.map(function (file) { return file.fsPath; }).join('\n');
-                    return [4 /*yield*/, vscode.workspace.openTextDocument({ content: content })];
-                case 2:
-                    document_1 = _a.sent();
-                    return [4 /*yield*/, vscode.window.showTextDocument(document_1)];
-                case 3:
                     _a.sent();
-                    // ドキュメントリンクプロバイダーを登録
-                    context.subscriptions.push(vscode.languages.registerDocumentLinkProvider(document_1.uri, new FileLinkProvider()));
-                    return [3 /*break*/, 5];
-                case 4:
-                    // 一致するファイルがない場合はメッセージを表示
-                    vscode.window.showInformationMessage('No matching files found.');
-                    _a.label = 5;
-                case 5: return [2 /*return*/];
+                    return [2 /*return*/];
             }
         });
     });

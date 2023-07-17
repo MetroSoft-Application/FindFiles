@@ -25,12 +25,20 @@
 
             form label span {
                 margin-right: 1px;
-                min-width: 60px;
+                min-width: 80px;
             }
 
             .button-container {
                 display: flex;
                 justify-content: flex-start;
+            }
+
+            #Exclude {
+                margin-left: 3px;
+            }
+
+            fieldset {
+                width: 260px;
             }
 
             button {
@@ -49,10 +57,17 @@
                 <span>Pattern</span>
                 <input type="text" id="Pattern" placeholder="*.ts, file*, *file*" name="Pattern">
             </label>
-            <label for="Exclude">
-                <span>Exclude</span>
-                <input type="text" id="Exclude" placeholder="*.ts, file*, *file*" name="Exclude">
-            </label>
+            <fieldset>
+                <legend>Search Options</legend>
+                <label for="IncludeFolder" style="justify-content: flex-start;">
+                    <span>IncludeFolder</span>
+                    <input type="checkbox" id="IncludeFolder" name="IncludeFolder" style="width: auto;">
+                </label>
+                <label for="Exclude">
+                    <span>Exclude</span>
+                    <input type="text" id="Exclude" placeholder="*.ts, file*, *file*" name="Exclude">
+                </label>
+            </fieldset>
             <div class="button-container">
                 <button type="button" id="button">Exec</button>
             </div>
@@ -63,6 +78,7 @@
             button.addEventListener('click', () =>
             {
                 let data = [document.getElementById('Pattern').value,
+                document.getElementById('IncludeFolder').checked,
                 document.getElementById('Exclude').value
                 ];
                 vscode.postMessage({

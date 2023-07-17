@@ -38,33 +38,52 @@ export function activate(context: vscode.ExtensionContext) {
 
 async function findFiles(context: vscode.ExtensionContext, input?: string) {
     let pattern = input?.split(",")[0];
-    if (pattern) {
+    await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        title: "Searching files...",
+        cancellable: false
+    }, async (progress) => {
         // 大文字小文字を区別せずに検索する正規表現パターン
         // pattern文字列でフィルタ
-        const regexPattern = convertWildcardToRegex(pattern);
-        const patternRegex = new RegExp(`^${regexPattern}$`, 'i');
-        let files = (await vscode.workspace.findFiles('**/*', null)).sort();
-        files = files.filter(file => patternRegex.test(path.basename(file.path)));
-        let exclude = input?.split(",")[1];
-        if (exclude) {
-            const excludeRegexPattern = convertWildcardToRegex(exclude);
-            const excludeRegex = new RegExp(`^${excludeRegexPattern}$`, 'i');
-            files = files.filter(file => !excludeRegex.test(path.basename(file.path)));
+        if (pattern) {
+            const regexPattern = convertWildcardToRegex(pattern);
+            const patternRegex = new RegExp(`^${regexPattern}$`, 'i');
+            let files = (await vscode.workspace.findFiles('**/*', null)).sort();
+            const isInclude = input && input.split(",")[1] === "true";
+            if (isInclude) {
+                // files = files.filter(file => patternRegex.test(path.dirname(file.path) || path.basename(file.path)));
+                files = files.filter(file => patternRegex.test(file.path));
+            } else {
+                files = files.filter(file => patternRegex.test(path.basename(file.path)));
+            }
+            let exclude = input?.split(",")[2];
+            if (exclude) {
+                const excludeRegexPattern = convertWildcardToRegex(exclude);
+                const excludeRegex = new RegExp(`^${excludeRegexPattern}$`, 'i');
+                if (isInclude) {
+                    // files = files.filter(file => !excludeRegex.test(file.path || path.basename(file.path)));
+                    files = files.filter(file => !excludeRegex.test(file.path));
+                } else {
+                    files = files.filter(file => !excludeRegex.test(path.basename(file.path)));
+                }
+            }
+            if (files.length > 0) {
+                // ファイルパス一覧を文字列に変換
+                let content = `Find Results(Ctrl or Alt + Click To Jump) Pattern = ${pattern}, IncludeFolder = ${isInclude}, Exclude = ${exclude !== "" ? exclude : "None"} \n`;
+
+                content += files.map(file => file.fsPath).join('\n');
+                // 新たなテキストエディターを開く
+                let document = await vscode.workspace.openTextDocument({ content });
+                await vscode.window.showTextDocument(document);
+                // ドキュメントリンクプロバイダーを登録
+                context.subscriptions.push(vscode.languages.registerDocumentLinkProvider(document.uri, new FileLinkProvider()));
+            } else {
+                // 一致するファイルがない場合はメッセージを表示
+                vscode.window.showInformationMessage('No matching files found.');
+            }
         }
-        if (files.length > 0) {
-            // ファイルパス一覧を文字列に変換
-            let content = "Find Results(Ctrl or Alt + Click To Jump) pattern = " + pattern + "\n";
-            content += files.map(file => file.fsPath).join('\n');
-            // 新たなテキストエディターを開く
-            let document = await vscode.workspace.openTextDocument({ content });
-            await vscode.window.showTextDocument(document);
-            // ドキュメントリンクプロバイダーを登録
-            context.subscriptions.push(vscode.languages.registerDocumentLinkProvider(document.uri, new FileLinkProvider()));
-        } else {
-            // 一致するファイルがない場合はメッセージを表示
-            vscode.window.showInformationMessage('No matching files found.');
-        }
-    }
+    });
+    // }
 }
 
 function convertWildcardToRegex(wildcard: string): string {
