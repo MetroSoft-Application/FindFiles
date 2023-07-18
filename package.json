@@ -2,7 +2,7 @@
   "name": "findfiles",
   "displayName": "FindFiles",
   "description": "Find files and create document links.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "publisher": "MetroSoft-Application",
   "icon": "resources/img/icon.png",
   "repository": {
