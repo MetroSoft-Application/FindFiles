@@ -1,0 +1,4 @@
+#Compile
+tsc --sourceMap .\src\extension.ts
+#Make
+vsce package
