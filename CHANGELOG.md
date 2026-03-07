@@ -1,3 +1,8 @@
+## [1.0.4]
+
+- Add activity bar integration (sidebar WebviewView)
+- Add search history with autocomplete dropdown
+
 ## [1.0.0]
 
 - First release

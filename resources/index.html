@@ -1,92 +1,280 @@
 <!DOCTYPE html>
 <html lang="en">
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Form</title>
-        <style>
-            form {
-                display: flex;
-                flex-direction: column;
-            }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-            form label,
-            form input {
-                width: 250px;
-                margin-top: 4px;
-                margin-bottom: 2px;
-            }
+        body {
+            background-color: var(--vscode-sideBar-background);
+            color: var(--vscode-foreground);
+            font-family: var(--vscode-font-family);
+            font-size: var(--vscode-font-size);
+            padding: 4px;
+            margin: 0;
+        }
 
-            form label {
-                display: flex;
-                align-items: center;
-            }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
 
-            form label span {
-                margin-right: 1px;
-                min-width: 80px;
-            }
+        form label,
+        form input[type="text"] {
+            width: 100%;
+            margin-top: 4px;
+            margin-bottom: 2px;
+        }
 
-            .button-container {
-                display: flex;
-                justify-content: flex-start;
-            }
+        form label {
+            display: flex;
+            align-items: center;
+        }
 
-            #Exclude {
-                margin-left: 3px;
-            }
+        form label span {
+            margin-right: 4px;
+            min-width: 80px;
+        }
 
-            fieldset {
-                width: 260px;
-            }
+        form input[type="text"] {
+            background-color: var(--vscode-input-background);
+            color: var(--vscode-input-foreground);
+            border: 1px solid var(--vscode-input-border, transparent);
+            padding: 2px 4px;
+            outline: none;
+        }
 
-            button {
-                margin-top: 5px;
-                padding: 5px 12px;
-                background-color: #2276B8;
-                color: #ffffff;
-                border: none;
-            }
-        </style>
-    </head>
+        form input[type="text"]:focus {
+            border-color: var(--vscode-focusBorder);
+        }
 
-    <body>
-        <form>
-            <label for="Pattern">
-                <span>Pattern</span>
-                <input type="text" id="Pattern" placeholder="*.ts, file*, *file*" name="Pattern">
-            </label>
-            <fieldset>
-                <legend>Search Options</legend>
-                <label for="IncludeFolder" style="justify-content: flex-start;">
-                    <span>IncludeFolder</span>
-                    <input type="checkbox" id="IncludeFolder" name="IncludeFolder" style="width: auto;">
-                </label>
-                <label for="Exclude">
-                    <span>Exclude</span>
-                    <input type="text" id="Exclude" placeholder="*.ts, file*, *file*" name="Exclude">
-                </label>
-            </fieldset>
-            <div class="button-container">
-                <button type="button" id="button">Exec</button>
+        .button-container {
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        #Exclude {
+            margin-left: 3px;
+        }
+
+        fieldset {
+            width: 100%;
+            border-color: var(--vscode-panel-border, #444);
+        }
+
+        legend {
+            color: var(--vscode-foreground);
+        }
+
+        button {
+            margin-top: 5px;
+            padding: 5px 12px;
+            width: 100%;
+            background-color: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: var(--vscode-button-hoverBackground);
+        }
+
+        .input-wrapper {
+            position: relative;
+            flex: 1;
+        }
+
+        .input-wrapper input[type="text"] {
+            width: 100%;
+        }
+
+        .history-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background-color: var(--vscode-dropdown-background, var(--vscode-input-background));
+            border: 1px solid var(--vscode-focusBorder);
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            max-height: 160px;
+            overflow-y: auto;
+        }
+
+        .history-dropdown.visible {
+            display: block;
+        }
+
+        .history-dropdown li {
+            padding: 3px 6px;
+            cursor: pointer;
+            color: var(--vscode-dropdown-foreground, var(--vscode-foreground));
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .history-dropdown li:hover,
+        .history-dropdown li.active {
+            background-color: var(--vscode-list-hoverBackground);
+        }
+    </style>
+</head>
+
+<body>
+    <form>
+        <label for="Pattern">
+            <span>Pattern</span>
+            <div class="input-wrapper">
+                <input type="text" id="Pattern" placeholder="*.ts, file*, *file*" name="Pattern" autocomplete="off">
+                <ul class="history-dropdown" id="patternDropdown"></ul>
             </div>
-        </form>
-        <script>
-            const vscode = acquireVsCodeApi();
-            const button = document.getElementById('button');
-            button.addEventListener('click', () =>
-            {
-                let data = [document.getElementById('Pattern').value,
+        </label>
+        <fieldset>
+            <legend>Search Options</legend>
+            <label for="IncludeFolder" style="justify-content: flex-start;">
+                <span>IncludeFolder</span>
+                <input type="checkbox" id="IncludeFolder" name="IncludeFolder" style="width: auto;">
+            </label>
+            <label for="Exclude">
+                <span>Exclude</span>
+                <div class="input-wrapper">
+                    <input type="text" id="Exclude" placeholder="*.ts, file*, *file*" name="Exclude" autocomplete="off">
+                    <ul class="history-dropdown" id="excludeDropdown"></ul>
+                </div>
+            </label>
+        </fieldset>
+        <div class="button-container">
+            <button type="button" id="button">Exec</button>
+        </div>
+    </form>
+    <script>
+        const vscode = acquireVsCodeApi();
+        const button = document.getElementById('button');
+
+        const historyMap = {
+            Pattern: { input: null, dropdown: null, items: [] },
+            Exclude: { input: null, dropdown: null, items: [] },
+        };
+
+        function initDropdown(fieldId, dropdownId, initialItems) {
+            const entry = historyMap[fieldId];
+            entry.input = document.getElementById(fieldId);
+            entry.dropdown = document.getElementById(dropdownId);
+            entry.items = initialItems || [];
+            renderDropdown(fieldId);
+
+            entry.input.addEventListener('focus', () => showDropdown(fieldId));
+            entry.input.addEventListener('input', () => showDropdown(fieldId));
+            entry.input.addEventListener('keydown', (e) => handleKey(e, fieldId));
+        }
+
+        function renderDropdown(fieldId) {
+            const { dropdown, items } = historyMap[fieldId];
+            dropdown.innerHTML = '';
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                li.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    historyMap[fieldId].input.value = item;
+                    hideDropdown(fieldId);
+                });
+                dropdown.appendChild(li);
+            });
+        }
+
+        function showDropdown(fieldId) {
+            const { dropdown, items, input } = historyMap[fieldId];
+            const val = input.value.toLowerCase();
+            const filtered = val ? items.filter(i => i.toLowerCase().includes(val)) : items;
+            if (filtered.length === 0) { hideDropdown(fieldId); return; }
+            dropdown.innerHTML = '';
+            filtered.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                li.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    input.value = item;
+                    hideDropdown(fieldId);
+                });
+                dropdown.appendChild(li);
+            });
+            dropdown.classList.add('visible');
+        }
+
+        function hideDropdown(fieldId) {
+            historyMap[fieldId].dropdown.classList.remove('visible');
+        }
+
+        function handleKey(e, fieldId) {
+            const { dropdown } = historyMap[fieldId];
+            const items = dropdown.querySelectorAll('li');
+            const active = dropdown.querySelector('li.active');
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const next = active ? active.nextElementSibling : items[0];
+                if (active) { active.classList.remove('active'); }
+                if (next) { next.classList.add('active'); }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const prev = active ? active.previousElementSibling : items[items.length - 1];
+                if (active) { active.classList.remove('active'); }
+                if (prev) { prev.classList.add('active'); }
+            } else if (e.key === 'Enter' && active) {
+                historyMap[fieldId].input.value = active.textContent;
+                hideDropdown(fieldId);
+            } else if (e.key === 'Escape') {
+                hideDropdown(fieldId);
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            ['Pattern', 'Exclude'].forEach(id => {
+                if (!historyMap[id].dropdown.contains(e.target) && e.target !== historyMap[id].input) {
+                    hideDropdown(id);
+                }
+            });
+        });
+
+        function updateHistory(patterns, excludes) {
+            historyMap['Pattern'].items = patterns;
+            historyMap['Exclude'].items = excludes;
+        }
+
+        initDropdown('Pattern', 'patternDropdown', window.__patternHistory || []);
+        initDropdown('Exclude', 'excludeDropdown', window.__excludeHistory || []);
+
+        window.addEventListener('message', event => {
+            const message = event.data;
+            if (message.command === 'updateHistory') {
+                updateHistory(message.patterns, message.excludes);
+            }
+        });
+
+        button.addEventListener('click', () => {
+            ['Pattern', 'Exclude'].forEach(id => hideDropdown(id));
+            let data = [
+                document.getElementById('Pattern').value,
                 document.getElementById('IncludeFolder').checked,
                 document.getElementById('Exclude').value
-                ];
-                vscode.postMessage({
-                    command: 'submit',
-                    text: data.join(",")
-                });
+            ];
+            vscode.postMessage({
+                command: 'submit',
+                text: data.join(",")
             });
-        </script>
-    </body>
+        });
+    </script>
+</body>
 
 </html>
