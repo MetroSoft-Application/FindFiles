@@ -2,6 +2,43 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 
+class FindFilesViewProvider implements vscode.WebviewViewProvider {
+    constructor(
+        private readonly _extensionPath: string,
+        private readonly _context: vscode.ExtensionContext
+    ) { }
+
+    resolveWebviewView(
+        webviewView: vscode.WebviewView,
+        _context: vscode.WebviewViewResolveContext,
+        _token: vscode.CancellationToken
+    ) {
+        webviewView.webview.options = {
+            enableScripts: true,
+        };
+        const htmlPath = vscode.Uri.file(
+            path.join(this._extensionPath, 'resources', 'index.html')
+        );
+        vscode.workspace.fs.readFile(htmlPath).then(htmlContent => {
+            webviewView.webview.html = htmlContent.toString();
+        });
+        webviewView.webview.onDidReceiveMessage(
+            async message => {
+                switch (message.command) {
+                    case 'submit':
+                        if (!message.text) {
+                            return;
+                        }
+                        await findFiles(this._context, message.text);
+                        return;
+                }
+            },
+            undefined,
+            this._context.subscriptions
+        );
+    }
+}
+
 export function activate(context: vscode.ExtensionContext) {
     let disposable = vscode.commands.registerCommand('FindFiles', async function () {
         let panel = vscode.window.createWebviewPanel(
@@ -34,6 +71,13 @@ export function activate(context: vscode.ExtensionContext) {
         );
     });
     context.subscriptions.push(disposable);
+
+    const findFilesViewProvider = new FindFilesViewProvider(context.extensionPath, context);
+    context.subscriptions.push(
+        vscode.window.registerWebviewViewProvider('findFilesView', findFilesViewProvider, {
+            webviewOptions: { retainContextWhenHidden: true }
+        })
+    );
 }
 
 async function findFiles(context: vscode.ExtensionContext, input?: string) {

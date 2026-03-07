@@ -16,10 +16,29 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:FindFiles"
+    "onCommand:FindFiles",
+    "onView:findFilesView"
   ],
-  "main": "./src/extension.js",
+  "main": "./dist/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "findFilesContainer",
+          "title": "FindFiles",
+          "icon": "resources/img/icon.png"
+        }
+      ]
+    },
+    "views": {
+      "findFilesContainer": [
+        {
+          "type": "webview",
+          "id": "findFilesView",
+          "name": "FindFiles"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "FindFiles",
